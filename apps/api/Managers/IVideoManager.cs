@@ -1,5 +1,5 @@
 using VideoSummarizer.Api.Models.DTOs;
-using VideoSummarizer.Api.Models.Entities;
+using VideoSummarizer.Api.Models.BusinessObjects;
 
 namespace VideoSummarizer.Api.Managers;
 

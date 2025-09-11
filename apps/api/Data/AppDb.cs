@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using VideoSummarizer.Api.Models.Entities;
+using VideoSummarizer.Api.Models.BusinessObjects;
 
 namespace VideoSummarizer.Api.Data;
 
