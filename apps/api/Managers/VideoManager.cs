@@ -34,7 +34,7 @@ public class VideoManager : IVideoManager
         return await _db.Videos.FindAsync(id);
     }
 
-    public async Task<bool> SaveVideoFileAsync(Guid id, Stream fileStream)
+    public async Task<bool> SaveVideoFileAsync(Guid id, Stream stream)
     {
         try
         {
@@ -45,7 +45,7 @@ public class VideoManager : IVideoManager
             // Save file to disk
             var filePath = Path.Combine(uploadsDir, $"{id}.mp4");
             using var fileStream = File.Create(filePath);
-            await fileStream.CopyToAsync(fileStream);
+            await fileStream.CopyToAsync(stream);
             return true;
         }
         catch

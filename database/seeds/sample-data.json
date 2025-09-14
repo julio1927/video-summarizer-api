@@ -1,0 +1,36 @@
+{
+  "videos": [
+    {
+      "id": "sample-video-1",
+      "fileName": "sample-video.mp4",
+      "contentType": "video/mp4",
+      "status": "completed",
+      "uploadedAt": "2024-01-01T00:00:00Z",
+      "processedAt": "2024-01-01T00:05:00Z"
+    }
+  ],
+  "shots": [
+    {
+      "videoId": "sample-video-1",
+      "startTime": 0.0,
+      "endTime": 5.0,
+      "keyframeUrl": "/static/keyframes/sample-video-1-shot-1.jpg",
+      "description": "Opening scene"
+    },
+    {
+      "videoId": "sample-video-1",
+      "startTime": 5.0,
+      "endTime": 10.0,
+      "keyframeUrl": "/static/keyframes/sample-video-1-shot-2.jpg",
+      "description": "Main content"
+    }
+  ],
+  "summaries": [
+    {
+      "videoId": "sample-video-1",
+      "type": "bullet_points",
+      "content": "• Introduction to the topic\n• Key concepts explained\n• Practical examples provided",
+      "createdAt": "2024-01-01T00:05:00Z"
+    }
+  ]
+}

@@ -33,6 +33,65 @@ artifacts/
 *.log
 .builds
 
+# .NET specific
+*.user
+*.suo
+*.cache
+*.pdb
+*.exe
+*.dll
+*.pch
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.ipch
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Entity Framework
+Migrations/
+
+# Database directory - ignore local files but keep structure
+database/*.db
+database/*.db-shm
+database/*.db-wal
+database/*.sqlite
+database/*.sqlite3
+database/dumps/
+database/backups/
+database/*.bak
+database/*.sql.dump
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
@@ -57,6 +116,7 @@ node_modules/
 
 # Logs
 logs
+*.log
 
 # Compiled binary addons
 build/Release
@@ -70,3 +130,22 @@ jspm_packages/
 
 # Optional eslint cache
 .eslintcache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.userosscache
+*.sln.docstates
+

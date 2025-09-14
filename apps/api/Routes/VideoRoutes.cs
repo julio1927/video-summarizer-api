@@ -9,7 +9,7 @@ public static class VideoRoutes
 {
     public static RouteGroupBuilder MapVideosApi(this RouteGroupBuilder group)
     {
-        // 1. Create video + get upload URL
+
         group.MapPost("", async (CreateVideoRequestDTO request, IVideoManager videoManager) =>
         {
             var video = await videoManager.CreateVideoAsync(request);
@@ -18,7 +18,7 @@ public static class VideoRoutes
         })
         .WithName("CreateVideo");
 
-        // 2. Upload video file
+
         group.MapPost("{id}/upload", async (Guid id, IVideoManager videoManager, HttpContext context) =>
         {
             var video = await videoManager.GetVideoAsync(id);
@@ -34,7 +34,7 @@ public static class VideoRoutes
         })
         .WithName("UploadVideo");
 
-        // 3. Enqueue processing job
+
         group.MapPost("{id}/process", async (Guid id, IVideoManager videoManager) =>
         {
             var video = await videoManager.GetVideoAsync(id);
@@ -48,7 +48,7 @@ public static class VideoRoutes
         })
         .WithName("ProcessVideo");
 
-        // 4. Get video status + summary
+
         group.MapGet("{id}", async (Guid id, IVideoManager videoManager) =>
         {
             var video = await videoManager.GetVideoAsync(id);
@@ -73,7 +73,7 @@ public static class VideoRoutes
         })
         .WithName("GetVideoStatus");
 
-        // 5. List shots for a video
+
         group.MapGet("{id}/shots", async (Guid id, IVideoManager videoManager) =>
         {
             var shots = await videoManager.GetVideoShotsAsync(id);
