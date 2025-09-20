@@ -1,0 +1,2 @@
+# This file ensures the keyframes directory is tracked by Git
+# Extracted keyframe images will be stored here but are ignored by .gitignore
