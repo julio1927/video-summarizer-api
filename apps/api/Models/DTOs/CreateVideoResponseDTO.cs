@@ -1,3 +1,3 @@
 namespace VideoSummarizer.Api.Models.DTOs;
 
-public record CreateVideoResponseDTO(Guid Id, string UploadUrl);
+public record CreateVideoResponseDTO(string Id, string UploadUrl);
