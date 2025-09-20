@@ -85,6 +85,14 @@ database/backups/
 database/*.bak
 database/*.sql.dump
 
+# Data directory - ignore user files but keep folder structure
+data/uploads/*
+!data/uploads/.gitkeep
+data/keyframes/*
+!data/keyframes/.gitkeep
+data/outputs/*
+!data/outputs/.gitkeep
+
 # Test results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*

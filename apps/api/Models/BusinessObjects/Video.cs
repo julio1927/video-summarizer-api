@@ -2,7 +2,7 @@ namespace VideoSummarizer.Api.Models.BusinessObjects;
 
 public class Video
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = string.Empty; // Now using filename as ID
     public string FileName { get; set; } = string.Empty;
     public string Status { get; set; } = "created";
     public DateTime CreatedAt { get; set; }

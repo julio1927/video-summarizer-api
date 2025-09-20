@@ -18,7 +18,7 @@ public class VideoManager : IVideoManager
     {
         var video = new Video
         {
-            Id = Guid.NewGuid(),
+            Id = request.FileName, // Use filename as ID for testing
             FileName = request.FileName,
             Status = "created",
             CreatedAt = DateTime.UtcNow
@@ -29,12 +29,12 @@ public class VideoManager : IVideoManager
         return video;
     }
 
-    public async Task<Video?> GetVideoAsync(Guid id)
+    public async Task<Video?> GetVideoAsync(string id)
     {
         return await _db.Videos.FindAsync(id);
     }
 
-    public async Task<bool> SaveVideoFileAsync(Guid id, Stream stream)
+    public async Task<bool> SaveVideoFileAsync(string id, Stream stream)
     {
         try
         {
@@ -42,8 +42,8 @@ public class VideoManager : IVideoManager
             var uploadsDir = Path.GetFullPath("../../data/uploads");
             Directory.CreateDirectory(uploadsDir);
 
-            // Save file to disk
-            var filePath = Path.Combine(uploadsDir, $"{id}.mp4");
+            // Save file to disk using filename as-is
+            var filePath = Path.Combine(uploadsDir, id);
             using var fileStream = File.Create(filePath);
             await fileStream.CopyToAsync(stream);
             return true;
@@ -54,7 +54,7 @@ public class VideoManager : IVideoManager
         }
     }
 
-    public async Task UpdateVideoStatusAsync(Guid id, string status)
+    public async Task UpdateVideoStatusAsync(string id, string status)
     {
         var video = await _db.Videos.FindAsync(id);
         if (video != null)
@@ -64,7 +64,7 @@ public class VideoManager : IVideoManager
         }
     }
 
-    public async Task CreateJobAsync(Guid videoId)
+    public async Task CreateJobAsync(string videoId)
     {
         var job = new Job
         {
@@ -79,12 +79,12 @@ public class VideoManager : IVideoManager
         await _db.SaveChangesAsync();
     }
 
-    public async Task<Summary?> GetVideoSummaryAsync(Guid videoId)
+    public async Task<Summary?> GetVideoSummaryAsync(string videoId)
     {
         return await _db.Summaries.FirstOrDefaultAsync(s => s.VideoId == videoId);
     }
 
-    public async Task<IEnumerable<Shot>> GetVideoShotsAsync(Guid videoId)
+    public async Task<IEnumerable<Shot>> GetVideoShotsAsync(string videoId)
     {
         return await _db.Shots
             .Where(s => s.VideoId == videoId)

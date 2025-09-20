@@ -19,7 +19,7 @@ public static class VideoRoutes
         .WithName("CreateVideo");
 
 
-        group.MapPost("{id}/upload", async (Guid id, IVideoManager videoManager, HttpContext context) =>
+        group.MapPost("{id}/upload", async (string id, IVideoManager videoManager, HttpContext context) =>
         {
             var video = await videoManager.GetVideoAsync(id);
             if (video == null)
@@ -35,7 +35,7 @@ public static class VideoRoutes
         .WithName("UploadVideo");
 
 
-        group.MapPost("{id}/process", async (Guid id, IVideoManager videoManager) =>
+        group.MapPost("{id}/process", async (string id, IVideoManager videoManager) =>
         {
             var video = await videoManager.GetVideoAsync(id);
             if (video == null)
@@ -49,7 +49,7 @@ public static class VideoRoutes
         .WithName("ProcessVideo");
 
 
-        group.MapGet("{id}", async (Guid id, IVideoManager videoManager) =>
+        group.MapGet("{id}", async (string id, IVideoManager videoManager) =>
         {
             var video = await videoManager.GetVideoAsync(id);
             if (video == null)
@@ -74,7 +74,7 @@ public static class VideoRoutes
         .WithName("GetVideoStatus");
 
 
-        group.MapGet("{id}/shots", async (Guid id, IVideoManager videoManager) =>
+        group.MapGet("{id}/shots", async (string id, IVideoManager videoManager) =>
         {
             var shots = await videoManager.GetVideoShotsAsync(id);
             var response = shots.Select(s => new ShotsResponseDTO(
