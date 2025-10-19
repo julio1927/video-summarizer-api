@@ -3,6 +3,8 @@ using Serilog;
 using VideoSummarizer.Api.Data;
 using VideoSummarizer.Api.Managers;
 using VideoSummarizer.Api.Routes;
+using VideoSummarizer.Api.Repositories;
+using VideoSummarizer.Api.Services;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -21,8 +23,20 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "Video Summarizer API", Version = "v1" });
 });
 
+// Add repositories
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+
+// Add services
+builder.Services.AddScoped<MockDataGenerator>();
+builder.Services.AddHostedService<VideoProcessingService>();
+
 // Add managers
 builder.Services.AddScoped<IVideoManager, VideoManager>();
+
+// Add configuration
+builder.Services.Configure<VideoProcessingOptions>(
+    builder.Configuration.GetSection(VideoProcessingOptions.SectionName));
 
 builder.Host.UseSerilog();
 

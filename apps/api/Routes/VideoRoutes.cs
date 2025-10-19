@@ -1,92 +1,151 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using VideoSummarizer.Api.Managers;
 using VideoSummarizer.Api.Models.DTOs;
 
 namespace VideoSummarizer.Api.Routes;
 
+/// <summary>
+/// Contains all video-related API routes for the Video Summarizer API.
+/// </summary>
 public static class VideoRoutes
 {
+    /// <summary>
+    /// Maps all video-related API endpoints to the specified route group.
+    /// </summary>
+    /// <param name="group">The route group builder to add routes to.</param>
+    /// <returns>The configured route group builder.</returns>
     public static RouteGroupBuilder MapVideosApi(this RouteGroupBuilder group)
     {
 
+        /// <summary>
+        /// Registers a new video in the system and returns an upload URL.
+        /// </summary>
+        /// <param name="request">The video registration request containing filename and content type.</param>
+        /// <param name="videoManager">The video manager service for handling video operations.</param>
+        /// <returns>Returns a 201 Created response with the video ID and upload URL.</returns>
+        /// <response code="201">Video successfully registered. Returns video ID and upload URL.</response>
+        /// <response code="400">Invalid request data.</response>
         group.MapPost("", async (CreateVideoRequestDTO request, IVideoManager videoManager) =>
         {
-            var video = await videoManager.CreateVideoAsync(request);
-            var response = new CreateVideoResponseDTO(video.Id, $"/api/videos/{video.Id}/upload");
-            return Results.Created($"/api/videos/{video.Id}", response);
+            try
+            {
+                CreateVideoResponseDTO response = await videoManager.CreateVideoAsync(request);
+                return Results.Created($"/api/videos/{response.Id}", response);
+            }
+            catch (Exception)
+            {
+                return Results.Problem("Failed to create video record");
+            }
         })
-        .WithName("CreateVideo");
+        .WithName("RegisterVideo");
 
 
+        /// <summary>
+        /// Uploads a video file for a previously registered video.
+        /// </summary>
+        /// <param name="id">The video ID returned from the RegisterVideo endpoint.</param>
+        /// <param name="videoManager">The video manager service for handling video operations.</param>
+        /// <param name="context">The HTTP context containing the video file in the request body.</param>
+        /// <returns>Returns a 200 OK response with the video ID if successful.</returns>
+        /// <response code="200">Video file successfully uploaded.</response>
+        /// <response code="404">Video with the specified ID not found.</response>
+        /// <response code="500">Failed to save the video file.</response>
         group.MapPost("{id}/upload", async (string id, IVideoManager videoManager, HttpContext context) =>
         {
-            var video = await videoManager.GetVideoAsync(id);
-            if (video == null)
-                return Results.NotFound();
+            try
+            {
+                StatusResponseDTO? videoDetails = await videoManager.GetVideoDetailsAsync(id);
+                if (videoDetails == null)
+                    return Results.NotFound();
 
-            var success = await videoManager.SaveVideoFileAsync(id, context.Request.Body);
-            if (!success)
-                return Results.Problem("Failed to save video file");
+                bool success = await videoManager.SaveVideoFileAsync(id, context.Request.Body);
+                if (!success)
+                    return Results.Problem("Failed to save video file");
 
-            await videoManager.UpdateVideoStatusAsync(id, "uploaded");
-            return Results.Ok(new { id = video.Id });
+                return Results.Ok(new { id = videoDetails.Id });
+            }
+            catch (Exception)
+            {
+                return Results.Problem("Failed to upload video file");
+            }
         })
-        .WithName("UploadVideo");
+        .WithName("UploadVideoFile");
 
 
+        /// <summary>
+        /// Starts the video processing job for an uploaded video.
+        /// </summary>
+        /// <param name="id">The video ID to process.</param>
+        /// <param name="videoManager">The video manager service for handling video operations.</param>
+        /// <returns>Returns a 202 Accepted response with the video details URL.</returns>
+        /// <response code="202">Video processing job started successfully.</response>
+        /// <response code="404">Video with the specified ID not found.</response>
         group.MapPost("{id}/process", async (string id, IVideoManager videoManager) =>
         {
-            var video = await videoManager.GetVideoAsync(id);
-            if (video == null)
-                return Results.NotFound();
+            try
+            {
+                StatusResponseDTO? videoDetails = await videoManager.GetVideoDetailsAsync(id);
+                if (videoDetails == null)
+                    return Results.NotFound();
 
-            await videoManager.CreateJobAsync(id);
-            await videoManager.UpdateVideoStatusAsync(id, "processing");
-
-            return Results.Accepted($"/api/videos/{id}");
+                await videoManager.CreateJobAsync(id);
+                return Results.Accepted($"/api/videos/{id}");
+            }
+            catch (Exception)
+            {
+                return Results.Problem("Failed to start video processing");
+            }
         })
-        .WithName("ProcessVideo");
+        .WithName("StartVideoProcessing");
 
 
+        /// <summary>
+        /// Retrieves video details including status, summary, and processing information.
+        /// </summary>
+        /// <param name="id">The video ID to retrieve details for.</param>
+        /// <param name="videoManager">The video manager service for handling video operations.</param>
+        /// <returns>Returns a 200 OK response with video details and summary if available.</returns>
+        /// <response code="200">Video details retrieved successfully.</response>
+        /// <response code="404">Video with the specified ID not found.</response>
         group.MapGet("{id}", async (string id, IVideoManager videoManager) =>
         {
-            var video = await videoManager.GetVideoAsync(id);
-            if (video == null)
-                return Results.NotFound();
+            try
+            {
+                StatusResponseDTO? response = await videoManager.GetVideoDetailsAsync(id);
+                if (response == null)
+                    return Results.NotFound();
 
-            var summary = await videoManager.GetVideoSummaryAsync(id);
-
-            var response = new StatusResponseDTO(
-                video.Id,
-                video.FileName,
-                video.Status,
-                video.Error,
-                summary != null ? new SummaryDTO(
-                    summary.BulletsMd,
-                    summary.ParagraphMd,
-                    JsonSerializer.Deserialize<object>(summary.TimelineJson) ?? new { }
-                ) : null
-            );
-
-            return Results.Ok(response);
+                return Results.Ok(response);
+            }
+            catch (Exception)
+            {
+                return Results.Problem("Failed to retrieve video details");
+            }
         })
-        .WithName("GetVideoStatus");
+        .WithName("GetVideoDetails");
 
 
+        /// <summary>
+        /// Retrieves video keyframes/shots for a processed video.
+        /// </summary>
+        /// <param name="id">The video ID to retrieve keyframes for.</param>
+        /// <param name="videoManager">The video manager service for handling video operations.</param>
+        /// <returns>Returns a 200 OK response with a list of video keyframes.</returns>
+        /// <response code="200">Video keyframes retrieved successfully.</response>
+        /// <response code="404">Video with the specified ID not found or no keyframes available.</response>
         group.MapGet("{id}/shots", async (string id, IVideoManager videoManager) =>
         {
-            var shots = await videoManager.GetVideoShotsAsync(id);
-            var response = shots.Select(s => new ShotsResponseDTO(
-                s.Id,
-                s.StartMs,
-                s.EndMs,
-                s.KeyframePath != null ? $"/static/keyframes/{Path.GetFileName(s.KeyframePath)}" : null
-            ));
-
-            return Results.Ok(response);
+            try
+            {
+                IEnumerable<ShotsResponseDTO> response = await videoManager.GetVideoShotsAsync(id);
+                return Results.Ok(response);
+            }
+            catch (Exception)
+            {
+                return Results.Problem("Failed to retrieve video shots");
+            }
         })
-        .WithName("GetVideoShots");
+        .WithName("GetVideoKeyframes");
 
         return group;
     }
