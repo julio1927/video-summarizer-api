@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using VideoSummarizer.Api.Models.DTOs;
 using VideoSummarizer.Api.Models.BusinessObjects;
 using VideoSummarizer.Api.Repositories;
@@ -5,7 +6,7 @@ using VideoSummarizer.Api.Constants;
 
 namespace VideoSummarizer.Api.Managers;
 
-public interface IVideoManager
+internal interface IVideoManager
 {
     /// <summary>
     /// Creates a new video record in the database.

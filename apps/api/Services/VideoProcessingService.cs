@@ -50,7 +50,6 @@ public class VideoProcessingService : BackgroundService
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
         IJobRepository jobRepository = scope.ServiceProvider.GetRequiredService<IJobRepository>();
         IVideoRepository videoRepository = scope.ServiceProvider.GetRequiredService<IVideoRepository>();
-        MockDataGenerator mockDataGenerator = scope.ServiceProvider.GetRequiredService<MockDataGenerator>();
 
         Job? job = await jobRepository.GetNextQueuedJobAsync();
         if (job == null)
@@ -66,25 +65,27 @@ public class VideoProcessingService : BackgroundService
             await jobRepository.UpdateStatusAsync(job.Id, JobStatuses.Processing);
             await videoRepository.UpdateStatusAsync(job.VideoId, VideoStatuses.Processing);
 
-            // Simulate processing delay
+            // TODO: Phase 2.2 - Implement real video processing here
+            // For now, this is a placeholder that will be replaced with actual processing
             await Task.Delay(TimeSpan.FromSeconds(_options.SimulatedDelaySeconds));
 
             // Get video to access filename
             Video? video = await videoRepository.GetByIdAsync(job.VideoId);
             if (video == null)
             {
-                _logger.LogWarning("Video {VideoId} not found for job {JobId}", job.VideoId, job.Id);
+                string errorMessage = $"Video {job.VideoId} not found for job {job.Id}";
+                _logger.LogWarning(errorMessage);
                 await jobRepository.UpdateStatusAsync(job.Id, JobStatuses.Failed);
+                await videoRepository.UpdateStatusAsync(job.VideoId, VideoStatuses.Failed);
+                await videoRepository.UpdateErrorAsync(job.VideoId, errorMessage);
                 return;
             }
 
-            // Generate mock data
-            IEnumerable<Shot> shots = mockDataGenerator.GenerateShots(job.VideoId, video.FileName, _options.ShotsPerVideo);
-            Summary summary = mockDataGenerator.GenerateSummary(job.VideoId, video.FileName);
-
-            // Save mock data to database
-            await jobRepository.AddShotsAsync(shots);
-            await jobRepository.AddSummaryAsync(summary);
+            // TODO: Phase 2.2 - Real processing will happen here
+            // - Extract video metadata
+            // - Extract keyframes
+            // - Detect shots
+            // - Generate summary
 
             // Update job and video status to completed
             await jobRepository.UpdateStatusAsync(job.Id, JobStatuses.Completed);
@@ -94,11 +95,13 @@ public class VideoProcessingService : BackgroundService
         }
         catch (Exception ex)
         {
+            string errorMessage = $"Processing failed: {ex.Message}";
             _logger.LogError(ex, "Failed to process job {JobId} for video {VideoId}", job.Id, job.VideoId);
             
-            // Update job and video status to failed
+            // Update job and video status to failed with error message
             await jobRepository.UpdateStatusAsync(job.Id, JobStatuses.Failed);
             await videoRepository.UpdateStatusAsync(job.VideoId, VideoStatuses.Failed);
+            await videoRepository.UpdateErrorAsync(job.VideoId, errorMessage);
         }
     }
 }

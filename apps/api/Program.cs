@@ -23,13 +23,14 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "Video Summarizer API", Version = "v1" });
 });
 
+// Add services
+builder.Services.AddScoped<IRetryPolicyService, RetryPolicyService>();
+builder.Services.AddScoped<IVideoMetadataService, VideoMetadataService>();
+builder.Services.AddHostedService<VideoProcessingService>();
+
 // Add repositories
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
-
-// Add services
-builder.Services.AddScoped<MockDataGenerator>();
-builder.Services.AddHostedService<VideoProcessingService>();
 
 // Add managers
 builder.Services.AddScoped<IVideoManager, VideoManager>();
